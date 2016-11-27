@@ -34,7 +34,7 @@ knitr::opts_chunk$set(echo=FALSE)
 
 ```{r Prepara dados}
 ## Leitura da planilha
-raw <- read.csv2("horas_tecnicas_a_partir_2011.csv")
+raw <- read.csv2("../docs/dados/horas_tecnicas_a_partir_2011.csv")
 ## Planilha de tecnicos
 tecnicos <- data.frame(tecnico=unique(raw$tecnico), grupo=NA)
 tecnicos$grupo <- c("M", "B", "M", "M", "M", "M", "M", "M", "B", "B", "M", "B", "M")
@@ -71,8 +71,8 @@ prop.sumario <- group_by(prop.resp, grupo, responsavel) %>%
 ## Ordena pelas proporcoes medias
 prop.sumario.ord <- prop.sumario[order(apply(prop.sumario[,2:3], 1, mean, weights = ), decreasing=TRUE),]
 ## Exporta as planilhas
-write.csv2(prop.resp, file="propHoras.csv", row.names=FALSE)
-write.csv2(prop.sumario, file="propHorasTotal.csv", row.names=FALSE)
+write.csv2(prop.resp, file="../docs/dados/propHoras.csv", row.names=FALSE)
+write.csv2(prop.sumario, file="../docs/dados/propHorasTotal.csv", row.names=FALSE)
 ## Paleta de cores
 tcores <- grDevices::colors()[grep('gr(a|e)y', grDevices::colors(), invert = T)]
 profs <- unique(prop.sumario.ord$responsavel)
@@ -99,11 +99,11 @@ por grupo, ano e semestre.
 
 (Clique no link para baixar)
 
-* [Dados brutos (escalas divulgadas pelo Conselho)](../tempo_tecnicos/escalas_tecnicos_originais.zip)
+* [Dados brutos (escalas divulgadas pelo Conselho)](dados/escalas_tecnicos_originais.zip)
 
-* [Planilha única com dados brutos](../tempo_tecnicos/horas_tecnicas_a_partir_2011.csv)
+* [Planilha única com dados brutos](dados/horas_tecnicas_a_partir_2011.csv)
 
-* [Proporção de tempo  por responsável, semestre e grupo](../tempo_tecnicos/propHoras.csv)
+* [Proporção de tempo  por responsável, semestre e grupo](dados/propHoras.csv)
 
 
 # Proporção do tempo por responsável
