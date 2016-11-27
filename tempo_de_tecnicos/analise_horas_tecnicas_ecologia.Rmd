@@ -82,7 +82,7 @@ cores <- tcores[c(1, 26, 433, 68, 142, 280, 318, 329, 334, 74, 428, 295, 354, 73
 names(cores) <- profs
 ```
 
-# Dados e métodos
+# Métodos
 
 * Tabulei os períodos de 4 horas concedidos a cada professor por semestre, 
 a partir das escalas divulgadas pela chefia do departamento;
@@ -95,7 +95,7 @@ Excluí desse total o tempo alocado a disciplinas e outras tarefas departamentai
 * Por fim, calculei a proporção das horas técnicas alocadas a cada professor em relação ao total disponível, 
 por grupo, ano e semestre.
 
-## Planilhas
+## Dados
 
 (Clique no link para baixar)
 
