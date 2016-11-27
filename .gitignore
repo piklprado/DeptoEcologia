@@ -1,0 +1,10 @@
+*.doc
+*.xls
+*.xlsx
+*.ods
+*.*~
+*~
+*.RData
+*.Rhistory
+.RData
+.Rhistory
