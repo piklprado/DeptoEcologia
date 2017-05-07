@@ -42,7 +42,7 @@ raw <- read.csv2("../docs/dados/horas_tecnicas_a_partir_2011.csv")
 tecnicos <- read.csv2("../docs/dados/lista_tecnicos.csv", as.is=TRUE)
 raw2 <- inner_join(raw, tecnicos, by="tecnico")
 ## Linhas sao ano/semestre/nivel do técnico, colunas sao os profs responsaveis
-por.responsavel <- filter(raw2, responsavel!="outros") %>%
+por.responsavel <- filter(raw2, responsavel!="outros" ) %>%
     group_by(ano, semestre, grupo, responsavel) %>%
     summarise(tot.periodos=sum(Periodos)) %>%
     spread(responsavel, tot.periodos, fill=0) %>%
@@ -93,7 +93,8 @@ a partir das escalas divulgadas pela chefia do departamento;
 * Quando os períodos estavam alocados a laboratórios eu dividi entre seus membros;
 * Separei os técnicos em dois grupos:
 	* Básico: `r paste(sort(tecnicos$tecnico[tecnicos$grupo=="B"]), collapse=", ")`.
-	* Médio/superior: `r paste(sort(tecnicos$tecnico[tecnicos$grupo=="M"]), collapse=", ")`.
+	* Médio: `r paste(sort(tecnicos$tecnico[tecnicos$grupo=="M"]), collapse=", ")`.
+	* Superior: `r paste(sort(tecnicos$tecnico[tecnicos$grupo=="S"]), collapse=", ")`.
 * Calculei então o total de horas de apoio técnico disponível em cada semestre, por grupo de técnicos. 
 Excluí desse total o tempo alocado a disciplinas e outras tarefas departamentais (*e.g.* casa de vegetação, informática).
 * Por fim, calculei a proporção das horas técnicas alocadas a cada professor em relação ao total disponível, 
@@ -121,8 +122,8 @@ alocada para cada professor, de `r min(prop.resp$ano)` a `r max(prop.resp$ano)` 
 A proporção do tempo foi calculada para os dois grupos de técnicos.
 
 ```{r tabela}
-prop.sumario[,2:3] <- prop.sumario[,2:3]*100
-kable(prop.sumario, col.names=c("Responsável", "Básico", "Médio/Sup."), digits=1,
+prop.sumario[,2:4] <- prop.sumario[,2:4]*100
+kable(prop.sumario, col.names=c("Responsável", "Básico", "Médio", "Superior"), digits=1,
       caption=paste("Percentual das horas de apoio técnico disponíveis entre",
                         min(prop.resp$ano), "a", max(prop.resp$ano),
                         "alocadas para cada professor do departamento de Ecologia do IB - USP"))
@@ -138,11 +139,15 @@ basico <- prop.sumario[order(prop.sumario$B, decreasing=TRUE),1:2] %>%
     filter(B>0)
 medio <- prop.sumario[order(prop.sumario$M, decreasing=TRUE),c(1,3)] %>%
     filter(M>0)
-par(mfrow=c(1,2), mar=c(5, 5, 4, 10))
+superior <- prop.sumario[order(prop.sumario$S, decreasing=TRUE),c(1,4)] %>%
+    filter(S>0)
+par(mfrow=c(1,3), mar=c(5, 5, 4, 10))
 barplot(as.matrix(basico[,2]), legend.text=basico[,1], col=cores[basico[,1]],
         args.legend=list( x=4, y=100, bty = "n"), main="Básico, 2011 - 2017", ylab= "% do tempo técnico disponível")
 barplot(as.matrix(medio[,2]), legend.text=medio[,1], col=cores[medio[,1]],
-        args.legend=list( x=5.2, y= 105 , bty = "n"), main="Médio/Superior, 2011 - 2017", ylab= "")
+        args.legend=list( x=5.2, y= 105 , bty = "n"), main="Médio, 2011 - 2017", ylab= "")
+barplot(as.matrix(superior[,2]), legend.text=superior[,1], col=cores[superior[,1]],
+        args.legend=list( x=5.2, y= 105 , bty = "n"), main="Superior, 2011 - 2017", ylab= "")
 par(mfrow=c(1,1))
 ```
 
@@ -172,11 +177,11 @@ basico <- basico[,c(TRUE, TRUE, apply(basico[,-c(1,2)] ,2, sum)>0)]
 par(mar=c(5, 5, 4, 9))
 barplot(t(as.matrix(basico[,-c(1,2)]))*100, legend.text=colnames(basico)[-c(1,2)], col=cores[colnames(basico)[-(1:2)]],
         args.legend=list( x=12.5, bty = "n"), main="Básico, por ano", ylab= "% do tempo no ano",
-        names.arg=2011:2017)
+        names.arg=basico$ano)
 ```
 
 
-### Médio/Superior
+### Médio
 
 ```{r tabela por ano medio}
 filter(prop.resp.ano, grupo=="M") %>%
@@ -185,19 +190,44 @@ filter(prop.resp.ano, grupo=="M") %>%
     mutate(prop.periodos=prop.periodos*100) %>%
     spread(ano, prop.periodos) %>%
     kable(col.names=c("Responsável", colnames(.)[-1]), digits=1,
-          caption="Percentual das horas de técnicos de nível médio/superior disponíveis a cada ano
+          caption="Percentual das horas de técnicos de nível médio disponíveis a cada ano
                    alocadas para cada professor do departamento de Ecologia do IB - USP")
 
 ```
 
-```{r barplots por ano, width=12, height=8}
+```{r barplots por ano medio, width=12, height=8}
 medio <- filter(prop.resp.ano, grupo=="M")
 medio <- medio[,c(1,2, order(prop.sumario$M, decreasing=TRUE)+2)]
 medio <- medio[,c(TRUE, TRUE, apply(medio[,-c(1,2)] ,2, sum)>0)]
 par(mar=c(5, 5, 4, 9))
 barplot(t(as.matrix(medio[,-c(1,2)]))*100, legend.text=colnames(medio)[-c(1,2)], col=cores[colnames(medio)[-(1:2)]],
-        args.legend=list( x=12.5, bty = "n"), main="Médio/superior, por ano", ylab= "% do tempo no ano",
-        names.arg=2011:2017)
+        args.legend=list( x=12.5, bty = "n"), main="Médio, por ano", ylab= "% do tempo no ano",
+        names.arg=medio$ano)
+
+```
+
+### Superior
+
+```{r tabela por ano superior}
+filter(prop.resp.ano, grupo=="S") %>%
+    select( - grupo) %>%
+    gather(key = responsavel, value = prop.periodos, Adriana:Welington) %>%
+    mutate(prop.periodos=prop.periodos*100) %>%
+    spread(ano, prop.periodos) %>%
+    kable(col.names=c("Responsável", colnames(.)[-1]), digits=1,
+          caption="Percentual das horas de técnicos de nível superior disponíveis a cada ano
+                   alocadas para cada professor do departamento de Ecologia do IB - USP")
+
+```
+
+```{r barplots por ano superior, width=12, height=8}
+superior <- filter(prop.resp.ano, grupo=="S")
+superior <- superior[,c(1,2, order(prop.sumario$S, decreasing=TRUE)+2)]
+superior <- superior[,c(TRUE, TRUE, apply(superior[,-c(1,2)] ,2, sum)>0)]
+par(mar=c(5, 5, 4, 9))
+barplot(t(as.matrix(superior[,-c(1,2)]))*100, legend.text=colnames(superior)[-c(1,2)], col=cores[colnames(superior)[-(1:2)]],
+        args.legend=list( x=12.5, bty = "n"), main="Superior, por ano", ylab= "% do tempo no ano",
+        names.arg=superior$ano)
 
 ```
 
